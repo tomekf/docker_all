@@ -1,0 +1,17 @@
+#!/bin/bash
+#!/bin/bash
+[ -z "$1" ] && echo "Please specify a command (ex. disable or enable)" && exit
+
+if [ "$1" == "disable" ]; then
+  docker-compose exec php sed -i -e 's/^zend_extension/\;zend_extension/g' /usr/local/etc/php/conf.d/xdebug.ini
+  echo "Xdebug has been disabled."
+elif [ "$1" == "enable" ]; then
+  docker-compose exec php sed -i -e 's/^\;zend_extension/zend_extension/g' /usr/local/etc/php/conf.d/xdebug.ini
+  echo "Xdebug has been enabled."
+else
+  echo "Please specify either 'enable' or 'disable' as an argument"
+  exit
+fi
+
+echo "Restarting php container..."
+docker restart php

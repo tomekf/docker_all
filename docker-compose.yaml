@@ -1,0 +1,71 @@
+version: '3.5'
+
+services:
+
+  nginx:
+    build: .docker/nginx
+    volumes:
+      - ./src:/var/www/html
+      - .docker/nginx/sites-enabled/:/etc/nginx/conf.d
+      - .docker/nginx/nginx_magento.conf/:/etc/nginx/nginx_magento.conf
+      - .docker/nginx/log:/var/log/nginx
+    depends_on:
+      - php
+    container_name: ${NGINX_CONTAINER_NAME}
+    networks:
+      application_network:
+        ipv4_address: ${NGINX_CONTAINER_IPV4_ADDRESS}
+
+  php:
+    build: .docker/php-fpm
+    depends_on:
+      - mysql
+    volumes:
+      - ./src:/var/www/html
+    container_name: ${PHP_CONTAINER_NAME}
+    networks:
+      application_network:
+        ipv4_address: ${PHP_CONTAINER_IPV4_ADDRESS}
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
+    container_name: ${MYSQL_CONTAINER_NAME}
+    networks:
+      application_network:
+        ipv4_address: ${MYSQL_CONTAINER_IPV4_ADDRESS}
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      PMA_HOST: ${MYSQL_CONTAINER_NAME}
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_USER_PASSWORD}
+    links:
+      - mysql
+    container_name: ${PHPMYADMIN_CONTAINER_NAME}
+    networks:
+      application_network:
+        ipv4_address: ${PHPMYADMIN_CONTAINER_IPV4_ADDRESS}
+
+  varnish:
+    build: .docker/varnish
+    container_name: ${VARNISH_CONTAINER_NAME}
+    volumes:
+      - .docker/varnish:/etc/varnish
+    networks:
+      application_network:
+        ipv4_address: ${VARNISH_CONTAINER_IPV4_ADDRESS}
+
+networks:
+  application_network:
+    driver: bridge
+    name: ${NETWORK_NAME}
+    ipam:
+      config:
+        - subnet: ${NETWORK_SUBNET}
