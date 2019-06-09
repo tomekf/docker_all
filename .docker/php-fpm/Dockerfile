@@ -22,7 +22,7 @@ RUN chsh -s /bin/bash owner
 RUN sed -i -e 's/www-data/owner/g' /usr/local/etc/php-fpm.d/www.conf
 
 # run apache as a 'owner'
-RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini
+RUN echo "memory_limit=2024M" > /usr/local/etc/php/conf.d/memory.ini
 
 RUN mkdir /home/owner
 RUN chown owner:owner /home/owner
