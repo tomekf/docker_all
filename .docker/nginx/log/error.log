@@ -1,2 +1,3 @@
 2019/06/09 20:26:32 [emerg] 1#1: "user" directive is not allowed here in /etc/nginx/nginx.conf:2
 2019/06/09 20:31:25 [emerg] 1#1: invalid number of arguments in "include" directive in /etc/nginx/conf.d/application.conf:11
+2019/08/07 10:47:38 [emerg] 1#1: host not found in upstream "php:9000" in /etc/nginx/conf.d/application.conf:2

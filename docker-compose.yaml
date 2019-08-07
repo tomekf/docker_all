@@ -2,58 +2,58 @@ version: '3.5'
 
 services:
 
-  nginx:
+  test_nginx:
     build: .docker/nginx
+    container_name: ${NGINX_CONTAINER_NAME}
     volumes:
       - ./src:/var/www/html
       - .docker/nginx/sites-enabled/:/etc/nginx/conf.d
       - .docker/nginx/nginx_magento.conf/:/etc/nginx/nginx_magento.conf
       - .docker/nginx/log:/var/log/nginx
     depends_on:
-      - php
-    container_name: ${NGINX_CONTAINER_NAME}
+      - testl_php
     networks:
       application_network:
         ipv4_address: ${NGINX_CONTAINER_IPV4_ADDRESS}
 
-  php:
+  testl_php:
     build: .docker/php-fpm
+    container_name: ${PHP_CONTAINER_NAME}
     depends_on:
-      - mysql
+      - test_mysql
     volumes:
       - ./src:/var/www/html
-    container_name: ${PHP_CONTAINER_NAME}
     networks:
       application_network:
         ipv4_address: ${PHP_CONTAINER_IPV4_ADDRESS}
 
-  mysql:
+  test_mysql:
     image: mysql:5.7
+    container_name: ${MYSQL_CONTAINER_NAME}
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
-    container_name: ${MYSQL_CONTAINER_NAME}
     networks:
       application_network:
         ipv4_address: ${MYSQL_CONTAINER_IPV4_ADDRESS}
 
-  phpmyadmin:
+  test_phpmyadmin:
     image: phpmyadmin/phpmyadmin
+    container_name: ${PHPMYADMIN_CONTAINER_NAME}
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       PMA_HOST: ${MYSQL_CONTAINER_NAME}
       PMA_USER: ${MYSQL_USER}
       PMA_PASSWORD: ${MYSQL_USER_PASSWORD}
     links:
-      - mysql
-    container_name: ${PHPMYADMIN_CONTAINER_NAME}
+      - test_mysql
     networks:
       application_network:
         ipv4_address: ${PHPMYADMIN_CONTAINER_IPV4_ADDRESS}
 
-  varnish:
+  test_varnish:
     build: .docker/varnish
     container_name: ${VARNISH_CONTAINER_NAME}
     volumes:
@@ -61,6 +61,26 @@ services:
     networks:
       application_network:
         ipv4_address: ${VARNISH_CONTAINER_IPV4_ADDRESS}
+
+  test_elasticsearch:
+    image: elasticsearch:6.8.2
+    container_name: ${ELASTICSEARCH_CONTAINER_NAME}
+    environment:
+      ES_JAVA_OPTS: '-Xms256m -Xmx256m'
+      network.bind_host: 0.0.0.0
+      network.host: 0.0.0.0
+      discovery.type: single-node
+    networks:
+      - application_network
+
+  test_kibana:
+    image: docker.elastic.co/kibana/kibana:6.8.2
+    container_name: ${KIBANA_CONTAINER_NAME}
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: ${ELASTICSEARCH_CONTAINER_NAME}
+    networks:
+      - application_network
 
 networks:
   application_network:
