@@ -35,6 +35,8 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
+    volumes:
+      - database:/var/lib/mysql
     networks:
       application_network:
         ipv4_address: ${MYSQL_CONTAINER_IPV4_ADDRESS}
@@ -89,3 +91,6 @@ networks:
     ipam:
       config:
         - subnet: ${NETWORK_SUBNET}
+
+volumes:
+  database:
